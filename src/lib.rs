@@ -10,9 +10,7 @@ pub struct HostConfig {
 
 pub fn parse_config_file(path: &str) -> Vec<HostConfig> {
     let content = std::fs::read_to_string(path).unwrap();
-    println!("Content: {:?}", content);
     let cfg = parse(&content);
-    println!("Config: {:?}", cfg);
     cfg
 }
 
@@ -25,22 +23,21 @@ pub fn parse(file: &str) -> Vec<HostConfig> {
                 "host" => {
                     if let Some(_) = cfg.name {
                         res.push(cfg.clone())
-                    } else {
-                        cfg = HostConfig::default();
-                        cfg.name = Some(v.to_string());
                     }
+                    cfg = HostConfig::default();
+                    cfg.name = Some(v.to_string());
                 },
                 "user" => cfg.user = Some(v.to_string()),
                 "hostname" => cfg.hostname = Some(v.to_string()),
                 "port" => cfg.port = v.parse().ok(),
                 "identityfile" => cfg.identity_file = Some(v.to_string()),
-                _ => println!("K={:?} V={:?}", k, v)
+                _ => continue
             }
-            println!("Config: {:?}", cfg);
         } else {
             continue
         }
     }
+    res.push(cfg.clone());
     res
 }
 
@@ -67,10 +64,6 @@ fn split_line<'a>(line: &'a str, sep: &str) -> (Option<(&'a str, &'a str)>, Opti
 mod tests {
     use super::*;
     use dirs::home_dir;
-    #[test]
-    fn it_works() {
-        assert_eq!(2 + 2, 4);
-    }
 
     #[test]
     fn local() {
